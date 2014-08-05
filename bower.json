@@ -1,0 +1,21 @@
+{
+  "name": "base-project",
+  "description": "Base Project",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "requirejs": "~2.1.11",
+    "requirejs-text": "~2.0.10",
+    "requirejs-domready": "~2.0.1",
+    "angular": "1.2.x",
+    "angular-route": "1.2.x",
+    "angular-loader": "1.2.x",
+    "angular-mocks": "~1.2.15",
+    "angular-sanitize": "~1.2.16",
+    "angular-animate": "~1.2.16",
+    "greensock": "~1.11.6",
+    "jquery": "~1.9.x",
+    "underscore": "~1.6.0"
+  }
+}
