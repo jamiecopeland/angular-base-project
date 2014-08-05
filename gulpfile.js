@@ -14,7 +14,6 @@ var sourcemaps = require('gulp-sourcemaps');
 var ngAnnotate = require('gulp-ng-annotate')
 var uglify = require('gulp-uglify')
 
-
 // --------------------------------------------------
 // LESS
 
@@ -107,15 +106,13 @@ gulp.task('jsLibraries', function() {
 
 gulp.task('jsApp', function() {
 
-  getOrderedJSFiles(function(projectFiles){
-    gulp.src(projectFiles)
-      .pipe(sourcemaps.init())
-      .pipe(concat('main.js'))
-      .pipe(ngAnnotate())
-      .pipe(uglify())
-      .pipe(sourcemaps.write())
-      .pipe(gulp.dest('./app/src-compiled'))
-  });
+  gulp.src(['./app/src/**/*Module.js', './app/src/**/*.js'])
+    .pipe(sourcemaps.init())
+    .pipe(concat('main.js'))
+    .pipe(ngAnnotate())
+    // .pipe(uglify())
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest('./app/src-compiled'))
 
 });
 

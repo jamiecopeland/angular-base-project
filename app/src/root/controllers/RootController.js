@@ -1,12 +1,12 @@
 angular.module('root').controller('RootController',
-  // [
-  //   '$scope', '$location', '$log',
+  [
+    '$scope', '$location', '$log',
     function(
       $scope, $location, $log
     ) {
-      // adsf.something()
+      
+      console.log('RootController initialized');
 
-      $log.log('RootController initialized');
     }
-  // ]
+  ]
 )
