@@ -13,6 +13,7 @@ var walk = require('walk');
 var sourcemaps = require('gulp-sourcemaps');
 var ngAnnotate = require('gulp-ng-annotate')
 var uglify = require('gulp-uglify')
+var htmlreplace = require('gulp-html-replace');
 
 // --------------------------------------------------
 // LESS
@@ -48,8 +49,19 @@ gulp.task('less', function () {
 });
 
 // --------------------------------------------------
-// JS
-function getOrderedJSFiles(completeHandler) {
+// JS/HTML HELPER VARIABLES AND METHODS
+
+var libraryFiles = [
+  './app/bower_components/angular/angular.js',
+  './app/bower_components/angular-route/angular-route.js',
+  './app/bower_components/angular-sanitize/angular-sanitize.js',
+  './app/bower_components/angular-animate/angular-animate.js',
+  './app/bower_components/greensock/src/uncompressed/TweenMax.js',
+  './app/bower_components/jquery/jquery.js',
+  './app/bower_components/underscore/underscore.js'
+];
+
+function getOrderedJSAppFiles(completeHandler) {
   
   var moduleFiles = [];
   var nonModuleFiles = [];  
@@ -82,25 +94,37 @@ function getOrderedJSFiles(completeHandler) {
   return walker;
 }
 
+function generateAppScriptTags(completeHandler) {
+  getOrderedJSAppFiles(function(files){
+    completeHandler(createScriptTagsFromFileList(files));
+  });
+}
+
+function createScriptTagsFromFileList(fileList) {
+  var output = '';
+  _.each(fileList, function(file){
+    output += '<script src="'+file.replace('./app/', '')+'"></script>\n'
+  });
+  return output;
+}
+
+// --------------------------------------------------
+// JS
+
+var compiledSourceDirectory = './app/src-compiled';
+var compiledLibrariesFileName = 'libraries.js';
+var compiledAppFileName = 'main.js';
+
 gulp.task('jsLibraries', function() {
 
   // bundle angular and angular animate separately
-  var libraryFiles = [
-    './app/bower_components/angular/angular.js',
-    './app/bower_components/angular-route/angular-route.js',
-    './app/bower_components/angular-sanitize/angular-sanitize.js',
-    './app/bower_components/angular-animate/angular-animate.js',
-    './app/bower_components/greensock/src/uncompressed/TweenMax.js',
-    './app/bower_components/jquery/jquery.js',
-    './app/bower_components/underscore/underscore.js'
-  ]
 
   gulp.src(libraryFiles)
       .pipe(sourcemaps.init())
-      .pipe(concat('libraries.js'))
+      .pipe(concat(compiledLibrariesFileName))
       .pipe(uglify())
       .pipe(sourcemaps.write())
-      .pipe(gulp.dest('./app/src-compiled'))
+      .pipe(gulp.dest(compiledSourceDirectory))
 
 });
 
@@ -108,27 +132,51 @@ gulp.task('jsApp', function() {
 
   gulp.src(['./app/src/**/*Module.js', './app/src/**/*.js'])
     .pipe(sourcemaps.init())
-    .pipe(concat('main.js'))
-    .pipe(ngAnnotate())
+    .pipe(concat(compiledAppFileName))
+    // .pipe(ngAnnotate())
     // .pipe(uglify())
     .pipe(sourcemaps.write())
-    .pipe(gulp.dest('./app/src-compiled'))
+    .pipe(gulp.dest(compiledSourceDirectory))
 
 });
 
 // --------------------------------------------------
-// JS
+// HTML
 
-gulp.task('js', function() {
+gulp.task('indexDevelopment', function() {
 
-  rjs({
-    name: 'main',
-    baseUrl: 'app/src/',
-    out: 'main-min.js',
-    mainConfigFile: 'app/src/main.js',
-    shim: {}
-  })
-  .pipe(gulp.dest('./app/src'));
+  var libraryFilesScriptTags = createScriptTagsFromFileList(libraryFiles);
+
+  generateAppScriptTags(function(projectFilesScriptTags){
+    
+    gulp.src(['./app/index-template.html'])
+      .pipe(htmlreplace({
+        jsLibraryImport: libraryFilesScriptTags,
+        jsProjectImport: projectFilesScriptTags
+      }))
+      .pipe(rename('index-dev.html'))
+      .pipe(gulp.dest('./app/'))
+
+  });
+
+});
+
+gulp.task('indexDeployment', function() {
+
+  var libraryFilesScriptTags = createScriptTagsFromFileList(libraryFiles);
+
+  generateAppScriptTags(function(projectFilesScriptTags){
+    
+    gulp.src(['./app/index-template.html'])
+      .pipe(htmlreplace({
+        jsLibraryImport: '<script src="' + compiledSourceDirectory.replace('./app/', '') + '/' + compiledLibrariesFileName + '"></script>',
+        jsProjectImport: '<script src="' + compiledSourceDirectory.replace('./app/', '') + '/' + compiledAppFileName + '"></script>'
+      }))
+      .pipe(rename('index.html'))
+      .pipe(gulp.dest('./app/'))
+
+  });
+
 });
 
 // --------------------------------------------------
@@ -173,6 +221,7 @@ gulp.task('default', ['develop'], function(){
   gulp.watch(['app/src/**/*.*', 'test/**/*.*'], function() {
     // gulp.run('test');
     gulp.run('jsApp');
+    gulp.run('indexDevelopment');
   });
 
 });

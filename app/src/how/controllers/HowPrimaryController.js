@@ -4,7 +4,7 @@ angular.module('how').controller('HowPrimaryController',
     function(
       $scope, $location, $log
     ) {
-      $log.log('RootController initialized');
+      console.log('HowPrimaryController initialized');
     }
   ]
 )

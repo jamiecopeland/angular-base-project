@@ -6,7 +6,7 @@ angular.module('root').controller('RootController',
     ) {
       
       console.log('RootController initialized');
-
+      
     }
   ]
 )
