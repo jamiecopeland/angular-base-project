@@ -14,6 +14,9 @@ var sourcemaps = require('gulp-sourcemaps');
 var ngAnnotate = require('gulp-ng-annotate')
 var uglify = require('gulp-uglify')
 var htmlreplace = require('gulp-html-replace');
+var templateCache = require('gulp-angular-templatecache');
+var del = require('del');
+var runSequence = require('run-sequence');
 
 // --------------------------------------------------
 // LESS
@@ -121,15 +124,35 @@ gulp.task('jsLibraries', function() {
 
 });
 
-gulp.task('jsApp', function() {
+gulp.task('jsApp', function(callback) {
+  
+  runSequence('deleteTemplates', 'createTemplates', 'mungeJS', callback);
 
-  gulp.src(['./app/src/**/*Module.js', './app/src/**/*.js'])
+});
+
+gulp.task('mungeJS', function(){
+
+  gulp.src(['./app/src/**/*Module.js', './app/src/**/*.js', './app/.temp/templates.js'])
     .pipe(sourcemaps.init())
     .pipe(concat(compiledAppFileName))
     .pipe(ngAnnotate())
     .pipe(uglify())
     .pipe(sourcemaps.write())
     .pipe(gulp.dest(compiledSourceDirectory))
+
+});
+
+gulp.task('createTemplates', function(){
+
+  gulp.src('./app/src/**/*.html')
+    .pipe(templateCache())
+    .pipe(gulp.dest('./app/.temp'))
+
+});
+
+gulp.task('deleteTemplates', function(cb){
+
+  del('./app/.temp/templates.js', cb);
 
 });
 
@@ -142,6 +165,7 @@ gulp.task('indexDeployment', function() {
     .pipe(gulp.dest('./deploy/'))
 
 });
+
 
 // --------------------------------------------------
 // TESTS
