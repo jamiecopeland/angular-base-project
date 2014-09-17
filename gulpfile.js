@@ -7,9 +7,9 @@ var plumber = require('gulp-plumber');
 var gutil = require('gulp-util');
 var notifier = new require('node-notifier')();
 var _ = require('lodash');
-var karma = require('karma').server;
+// var karma = require('karma').server;
 var concat = require('gulp-concat')
-var walk = require('walk');
+// var walk = require('walk');
 var sourcemaps = require('gulp-sourcemaps');
 var ngAnnotate = require('gulp-ng-annotate')
 var uglify = require('gulp-uglify')
@@ -104,7 +104,7 @@ function createScriptTagsFromFileList(fileList) {
 // --------------------------------------------------
 // JS
 
-var compiledSourceDirectory = 'src';
+var compiledSourceDirectory = './deploy/src';
 var compiledLibrariesFileName = 'libraries.js';
 var compiledAppFileName = 'main.js';
 
