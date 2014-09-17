@@ -56,7 +56,6 @@ var libraryFiles = [
   './app/bower_components/angular-route/angular-route.js',
   './app/bower_components/angular-sanitize/angular-sanitize.js',
   './app/bower_components/angular-animate/angular-animate.js',
-  './app/bower_components/greensock/src/uncompressed/TweenMax.js',
   './app/bower_components/jquery/jquery.js',
   './app/bower_components/underscore/underscore.js'
 ];
@@ -64,30 +63,24 @@ var libraryFiles = [
 function getOrderedJSAppFiles(completeHandler) {
   
   var moduleFiles = [];
-  var nonModuleFiles = [];  
-  var bootFile;
+  var nonModuleFiles = [];
 
   // Walker options
   var walker  = walk.walk('./app/src', { followLinks: false });
 
   walker.on('file', function(root, stat, next) {
 
-      if(stat.name.indexOf('boot.js') > -1) {
-        bootFile = root + '/' + stat.name;
+      if(stat.name.indexOf('Module.js') > -1) {
+        moduleFiles.push(root + '/' + stat.name);  
       } else {
-        if(stat.name.indexOf('Module.js') > -1) {
-          moduleFiles.push(root + '/' + stat.name);  
-        } else {
-          nonModuleFiles.push(root + '/' + stat.name);  
-        }  
+        nonModuleFiles.push(root + '/' + stat.name);  
       }
-      
+
       next();
   });
 
   walker.on('end', function() {
     var files = moduleFiles.concat(nonModuleFiles);
-    files.push(bootFile);
     completeHandler(files);
   });
 
@@ -162,7 +155,7 @@ gulp.task('indexDevelopment', function() {
 });
 
 gulp.task('indexDeployment', function() {
-
+  console.log('index deploy');
   var libraryFilesScriptTags = createScriptTagsFromFileList(libraryFiles);
 
   generateAppScriptTags(function(projectFilesScriptTags){
@@ -208,9 +201,9 @@ gulp.task('test', function (done) {
 // --------------------------------------------------
 // DEFAULT
 
-gulp.task('develop', ['less', 'test']);
+gulp.task('develop', ['less', 'jsLibraries', 'jsApp', 'indexDevelopment', 'indexDeployment'/*, 'test'*/]);
 
-gulp.task('deploy', ['develop', 'requireJS']);
+gulp.task('deploy', ['develop']);
 
 gulp.task('default', ['develop'], function(){
   
@@ -222,6 +215,7 @@ gulp.task('default', ['develop'], function(){
     // gulp.run('test');
     gulp.run('jsApp');
     gulp.run('indexDevelopment');
+    gulp.run('indexDeployment');
   });
 
 });
