@@ -6,7 +6,7 @@ var port = process.env.PORT || 3000;
 // Express setup
 
 var app = express();
-app.use(express.static(__dirname + '/../app'));
+app.use(express.static(__dirname + '/../deploy'));
 
 // --------------------------------------------------
 // Server startup

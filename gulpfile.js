@@ -45,7 +45,7 @@ gulp.task('less', function () {
         compress: true
     }))
     .pipe(rename('main.css'))
-    .pipe(gulp.dest('app/css'));
+    .pipe(gulp.dest('deploy/css'));
 });
 
 // --------------------------------------------------
@@ -104,7 +104,7 @@ function createScriptTagsFromFileList(fileList) {
 // --------------------------------------------------
 // JS
 
-var compiledSourceDirectory = './app/src-compiled';
+var compiledSourceDirectory = 'src';
 var compiledLibrariesFileName = 'libraries.js';
 var compiledAppFileName = 'main.js';
 
@@ -136,26 +136,7 @@ gulp.task('jsApp', function() {
 // --------------------------------------------------
 // HTML
 
-gulp.task('indexDevelopment', function() {
-
-  var libraryFilesScriptTags = createScriptTagsFromFileList(libraryFiles);
-
-  generateAppScriptTags(function(projectFilesScriptTags){
-    
-    gulp.src(['./app/index-template.html'])
-      .pipe(htmlreplace({
-        jsLibraryImport: libraryFilesScriptTags,
-        jsProjectImport: projectFilesScriptTags
-      }))
-      .pipe(rename('index-dev.html'))
-      .pipe(gulp.dest('./app/'))
-
-  });
-
-});
-
 gulp.task('indexDeployment', function() {
-  console.log('index deploy');
   var libraryFilesScriptTags = createScriptTagsFromFileList(libraryFiles);
 
   generateAppScriptTags(function(projectFilesScriptTags){
@@ -166,7 +147,7 @@ gulp.task('indexDeployment', function() {
         jsProjectImport: '<script src="' + compiledSourceDirectory.replace('./app/', '') + '/' + compiledAppFileName + '"></script>'
       }))
       .pipe(rename('index.html'))
-      .pipe(gulp.dest('./app/'))
+      .pipe(gulp.dest('./deploy/'))
 
   });
 
@@ -201,7 +182,7 @@ gulp.task('test', function (done) {
 // --------------------------------------------------
 // DEFAULT
 
-gulp.task('develop', ['less', 'jsLibraries', 'jsApp', 'indexDevelopment', 'indexDeployment'/*, 'test'*/]);
+gulp.task('develop', ['less', 'jsLibraries', 'jsApp', 'indexDeployment'/*, 'test'*/]);
 
 gulp.task('deploy', ['develop']);
 
@@ -214,7 +195,6 @@ gulp.task('default', ['develop'], function(){
   gulp.watch(['app/src/**/*.*', 'test/**/*.*'], function() {
     // gulp.run('test');
     gulp.run('jsApp');
-    gulp.run('indexDevelopment');
     gulp.run('indexDeployment');
   });
 
