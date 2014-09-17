@@ -133,8 +133,8 @@ gulp.task('jsApp', function() {
   gulp.src(['./app/src/**/*Module.js', './app/src/**/*.js'])
     .pipe(sourcemaps.init())
     .pipe(concat(compiledAppFileName))
-    // .pipe(ngAnnotate())
-    // .pipe(uglify())
+    .pipe(ngAnnotate())
+    .pipe(uglify())
     .pipe(sourcemaps.write())
     .pipe(gulp.dest(compiledSourceDirectory))
 
