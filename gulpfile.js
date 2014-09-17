@@ -137,19 +137,9 @@ gulp.task('jsApp', function() {
 // HTML
 
 gulp.task('indexDeployment', function() {
-  var libraryFilesScriptTags = createScriptTagsFromFileList(libraryFiles);
 
-  generateAppScriptTags(function(projectFilesScriptTags){
-    
-    gulp.src(['./app/index-template.html'])
-      .pipe(htmlreplace({
-        jsLibraryImport: '<script src="' + compiledSourceDirectory.replace('./app/', '') + '/' + compiledLibrariesFileName + '"></script>',
-        jsProjectImport: '<script src="' + compiledSourceDirectory.replace('./app/', '') + '/' + compiledAppFileName + '"></script>'
-      }))
-      .pipe(rename('index.html'))
-      .pipe(gulp.dest('./deploy/'))
-
-  });
+  gulp.src(['./app/index.html'])
+    .pipe(gulp.dest('./deploy/'))
 
 });
 
@@ -192,7 +182,7 @@ gulp.task('default', ['develop'], function(){
     gulp.run('less');
   });
 
-  gulp.watch(['app/src/**/*.*', 'test/**/*.*'], function() {
+  gulp.watch(['app/index.html', 'app/src/**/*.*', 'test/**/*.*'], function() {
     // gulp.run('test');
     gulp.run('jsApp');
     gulp.run('indexDeployment');
