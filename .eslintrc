@@ -1,0 +1,17 @@
+{
+  "env": {
+    "browser": true
+  },
+  "globals": {
+    "_": true,
+    "angular": true,
+    "console": true
+  },
+  "rules": {
+    "quotes": false,
+    "eol-last": false,
+    "strict": false,
+    "no-console": false,
+    "no-unused-vars": false
+  }
+}

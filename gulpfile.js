@@ -17,6 +17,8 @@ var htmlreplace = require('gulp-html-replace');
 var templateCache = require('gulp-angular-templatecache');
 var del = require('del');
 var runSequence = require('run-sequence');
+var eslint = require('gulp-eslint');
+
 
 // --------------------------------------------------
 // LESS
@@ -104,6 +106,14 @@ function createScriptTagsFromFileList(fileList) {
   return output;
 }
 
+var onESLintError = function (err) {
+  gutil.log(gutil.colors.red('Less Error: ' + err.message));
+  notifier.notify({
+      title: 'Lint Error',
+      message: 'Error: ' + err
+  });
+};
+
 // --------------------------------------------------
 // JS
 
@@ -132,7 +142,13 @@ gulp.task('jsApp', function(callback) {
 
 gulp.task('mungeJS', function(){
 
-  gulp.src(['./app/src/**/*Module.js', './app/src/**/*.js', './app/.temp/templates.js'])
+  gulp.src(['./app/src/app.js', './app/src/**/*Module.js', './app/src/**/*.js', './app/.temp/templates.js'])
+    .pipe(plumber({
+      errorHandler: onESLintError
+    }))
+    .pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failOnError())
     .pipe(sourcemaps.init())
     .pipe(concat(compiledAppFileName))
     .pipe(ngAnnotate())

@@ -1,1 +1,1 @@
-angular.module('root', [])
+angular.module('root', []);

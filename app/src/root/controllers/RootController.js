@@ -1,7 +1,5 @@
 angular.module('root').controller('RootController',
-  function(
-    $scope, $location, $log
-  ) {
-    console.log('RootController initialized'); 
+  function($scope) {
+    console.log('RootController initialized');
   }
-)
+);
