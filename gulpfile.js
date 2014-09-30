@@ -139,7 +139,7 @@ gulp.task('jsLibraries', function() {
       .pipe(sourcemaps.init())
       .pipe(concat(compiledLibrariesFileName))
       .pipe(uglify())
-      .pipe(sourcemaps.write())
+      .pipe(sourcemaps.write('.'))
       .pipe(gulp.dest(compiledSourceDirectory))
 
 });
@@ -163,7 +163,7 @@ gulp.task('mungeJS', function(){
     .pipe(concat(compiledAppFileName))
     .pipe(ngAnnotate())
     .pipe(uglify())
-    .pipe(sourcemaps.write())
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(compiledSourceDirectory))
 
 });
