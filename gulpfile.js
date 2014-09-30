@@ -115,6 +115,16 @@ var onESLintError = function (err) {
 };
 
 // --------------------------------------------------
+// IMAGES
+
+gulp.task('images', function() {
+
+  gulp.src(['./app/images/**/*.*'])
+    .pipe(gulp.dest('./deploy/images'))
+
+});
+
+// --------------------------------------------------
 // JS
 
 var compiledSourceDirectory = './deploy/src';
@@ -212,7 +222,7 @@ gulp.task('test', function (done) {
 // --------------------------------------------------
 // DEFAULT
 
-gulp.task('develop', ['less', 'jsLibraries', 'jsApp', 'indexDeployment'/*, 'test'*/]);
+gulp.task('develop', ['less', 'images', 'jsLibraries', 'jsApp', 'indexDeployment'/*, 'test'*/]);
 
 gulp.task('deploy', ['develop']);
 
@@ -220,6 +230,10 @@ gulp.task('default', ['develop'], function(){
   
   gulp.watch('app/less/**/*.*', function() {
     gulp.run('less');
+  });
+
+  gulp.watch('app/images/**/*.*', function() {
+    gulp.run('images');
   });
 
   gulp.watch(['app/index.html', 'app/src/**/*.*', 'test/**/*.*'], function() {
