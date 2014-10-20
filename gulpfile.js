@@ -61,12 +61,12 @@ var libraryFiles = [
   './app/bower_components/angular-route/angular-route.js',
   './app/bower_components/angular-sanitize/angular-sanitize.js',
   './app/bower_components/angular-animate/angular-animate.js',
-  './app/bower_components/jquery/jquery.js',
+  './app/bower_components/jquery/dist/jquery.js',
   './app/bower_components/underscore/underscore.js'
 ];
 
 function getOrderedJSAppFiles(completeHandler) {
-  
+
   var moduleFiles = [];
   var nonModuleFiles = [];
 
@@ -76,9 +76,9 @@ function getOrderedJSAppFiles(completeHandler) {
   walker.on('file', function(root, stat, next) {
 
       if(stat.name.indexOf('Module.js') > -1) {
-        moduleFiles.push(root + '/' + stat.name);  
+        moduleFiles.push(root + '/' + stat.name);
       } else {
-        nonModuleFiles.push(root + '/' + stat.name);  
+        nonModuleFiles.push(root + '/' + stat.name);
       }
 
       next();
@@ -145,7 +145,7 @@ gulp.task('jsLibraries', function() {
 });
 
 gulp.task('jsApp', function(callback) {
-  
+
   runSequence('deleteTemplates', 'createTemplates', 'mungeJS', callback);
 
 });
@@ -227,7 +227,7 @@ gulp.task('develop', ['less', 'images', 'jsLibraries', 'jsApp', 'indexDeployment
 gulp.task('deploy', ['develop']);
 
 gulp.task('default', ['develop'], function(){
-  
+
   gulp.watch('app/less/**/*.*', function() {
     gulp.run('less');
   });
