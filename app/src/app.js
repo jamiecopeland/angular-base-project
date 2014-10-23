@@ -1,4 +1,5 @@
 angular.module('app', [
   'root',
-  'exceptionOverride'
+  'exceptionOverride',
+  'templates'
 ]);

@@ -65,47 +65,6 @@ var libraryFiles = [
   './app/bower_components/underscore/underscore.js'
 ];
 
-function getOrderedJSAppFiles(completeHandler) {
-
-  var moduleFiles = [];
-  var nonModuleFiles = [];
-
-  // Walker options
-  var walker  = walk.walk('./app/src', { followLinks: false });
-
-  walker.on('file', function(root, stat, next) {
-
-      if(stat.name.indexOf('Module.js') > -1) {
-        moduleFiles.push(root + '/' + stat.name);
-      } else {
-        nonModuleFiles.push(root + '/' + stat.name);
-      }
-
-      next();
-  });
-
-  walker.on('end', function() {
-    var files = moduleFiles.concat(nonModuleFiles);
-    completeHandler(files);
-  });
-
-  return walker;
-}
-
-function generateAppScriptTags(completeHandler) {
-  getOrderedJSAppFiles(function(files){
-    completeHandler(createScriptTagsFromFileList(files));
-  });
-}
-
-function createScriptTagsFromFileList(fileList) {
-  var output = '';
-  _.each(fileList, function(file){
-    output += '<script src="'+file.replace('./app/', '')+'"></script>\n'
-  });
-  return output;
-}
-
 var onESLintError = function (err) {
   gutil.log(gutil.colors.red('Less Error: ' + err.message));
   notifier.notify({
@@ -133,8 +92,6 @@ var compiledAppFileName = 'main.js';
 
 gulp.task('jsLibraries', function() {
 
-  // bundle angular and angular animate separately
-
   gulp.src(libraryFiles)
       .pipe(sourcemaps.init())
       .pipe(concat(compiledLibrariesFileName))
@@ -151,7 +108,7 @@ gulp.task('jsApp', function(callback) {
 });
 
 gulp.task('mungeJS', function(){
-
+  console.log('mungeJS');
   gulp.src(['./app/src/app.js', './app/src/**/*Module.js', './app/src/**/*.js', './app/.temp/templates.js'])
     .pipe(plumber({
       errorHandler: onESLintError
@@ -168,17 +125,21 @@ gulp.task('mungeJS', function(){
 
 });
 
-gulp.task('createTemplates', function(){
+gulp.task('createTemplates', function(callback){
 
-  gulp.src('./app/src/**/*.html')
+  var stream = gulp.src('./app/src/**/*.html')
     .pipe(templateCache())
-    .pipe(gulp.dest('./app/.temp'))
+    .pipe(gulp.dest('./app/.temp'));
+
+  stream.on('end', function(){
+    callback();
+  });
 
 });
 
-gulp.task('deleteTemplates', function(cb){
+gulp.task('deleteTemplates', function(callback){
 
-  del('./app/.temp/templates.js', cb);
+  del('./app/.temp/templates.js', callback);
 
 });
 
@@ -191,7 +152,6 @@ gulp.task('indexDeployment', function() {
     .pipe(gulp.dest('./deploy/'))
 
 });
-
 
 // --------------------------------------------------
 // TESTS
