@@ -5,43 +5,35 @@ var replace = require('gulp-replace');
 var rjs = require('gulp-requirejs');
 var plumber = require('gulp-plumber');
 var gutil = require('gulp-util');
-var notifier = new require('node-notifier')();
+var notifier = require('node-notifier');
 var _ = require('lodash');
-// var karma = require('karma').server;
-var concat = require('gulp-concat')
+var karma = require('karma').server;
+var concat = require('gulp-concat');
 // var walk = require('walk');
 var sourcemaps = require('gulp-sourcemaps');
-var ngAnnotate = require('gulp-ng-annotate')
-var uglify = require('gulp-uglify')
+var ngAnnotate = require('gulp-ng-annotate');
+var uglify = require('gulp-uglify');
 var htmlreplace = require('gulp-html-replace');
 var templateCache = require('gulp-angular-templatecache');
 var del = require('del');
 var runSequence = require('run-sequence');
 var eslint = require('gulp-eslint');
 
-
 // --------------------------------------------------
 // LESS
 
-var getFileNameFromErrorMessage = function(errorMessage) {
-  var filePathWithoutSuffix = errorMessage.split('.less')[0];
-  var filePathWithougSuffixSplit = filePathWithoutSuffix.split('/');
-  return filePathWithougSuffixSplit[filePathWithougSuffixSplit.length-1];
-}
-
-var getLineNumberFromErrorMessage = function(errorMessage) {
-  return errorMessage.split('line no.')[1].replace(' ', '');
-}
-
 var onLessError = function (err) {
-  gutil.log(gutil.colors.red('Less Error: ' + err.message));
+  var fileName = _.last(err.message.split('.less')[0].split('/'));
+  var lineNumber = err.message.split('line no.')[1].replace(' ', '');
+
   notifier.notify({
-      title: 'Less Error',
-      message: getFileNameFromErrorMessage(err.message) + '.less - line ' + getLineNumberFromErrorMessage(err.message)
+    title: 'Less Error',
+    message: fileName + '.less - line: ' + lineNumber + '\n' + err.message.split('in file /')[0]
   });
 };
 
-gulp.task('less', function () {
+gulp.task('compileLess', function () {
+
   gulp.src('app/less/_html5-boilerplate.less')
     .pipe(plumber({
       errorHandler: onLessError
@@ -51,10 +43,25 @@ gulp.task('less', function () {
     }))
     .pipe(rename('main.css'))
     .pipe(gulp.dest('deploy/css'));
+
 });
 
 // --------------------------------------------------
-// JS/HTML HELPER VARIABLES AND METHODS
+// Images
+
+gulp.task('copyImages', function() {
+
+  gulp.src(['./app/images/**/*.*'])
+    .pipe(gulp.dest('./deploy/images'));
+
+});
+
+// --------------------------------------------------
+// JavaScript
+
+var compiledSourceDirectory = './deploy/src';
+var compiledLibrariesFileName = 'libraries.js';
+var compiledAppFileName = 'main.js';
 
 var libraryFiles = [
   './app/bower_components/angular/angular.js',
@@ -66,49 +73,34 @@ var libraryFiles = [
 ];
 
 var onESLintError = function (err) {
-  gutil.log(gutil.colors.red('Less Error: ' + err.message));
+  var fileName = _.last(err.fileName.split('/'));
+  var message  = fileName + ' - line: ' + err.lineNumber + '\n' + err.message;
+
   notifier.notify({
       title: 'Lint Error',
-      message: 'Error: ' + err
+      message: message
   });
 };
 
-// --------------------------------------------------
-// IMAGES
-
-gulp.task('images', function() {
-
-  gulp.src(['./app/images/**/*.*'])
-    .pipe(gulp.dest('./deploy/images'))
-
-});
-
-// --------------------------------------------------
-// JS
-
-var compiledSourceDirectory = './deploy/src';
-var compiledLibrariesFileName = 'libraries.js';
-var compiledAppFileName = 'main.js';
-
-gulp.task('jsLibraries', function() {
+gulp.task('compileJSLibraries', function() {
 
   gulp.src(libraryFiles)
       .pipe(sourcemaps.init())
       .pipe(concat(compiledLibrariesFileName))
       .pipe(uglify())
       .pipe(sourcemaps.write('.'))
-      .pipe(gulp.dest(compiledSourceDirectory))
+      .pipe(gulp.dest(compiledSourceDirectory));
 
 });
 
-gulp.task('jsApp', function(callback) {
+gulp.task('compileJSApp', function(callback) {
 
   runSequence('deleteTemplates', 'createTemplates', 'mungeJS', callback);
 
 });
 
 gulp.task('mungeJS', function(){
-  console.log('mungeJS');
+
   gulp.src(['./app/src/app.js', './app/src/**/*Module.js', './app/src/**/*.js', './app/.temp/templates.js'])
     .pipe(plumber({
       errorHandler: onESLintError
@@ -121,7 +113,7 @@ gulp.task('mungeJS', function(){
     .pipe(ngAnnotate())
     .pipe(uglify())
     .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(compiledSourceDirectory))
+    .pipe(gulp.dest(compiledSourceDirectory));
 
 });
 
@@ -146,27 +138,28 @@ gulp.task('deleteTemplates', function(callback){
 // --------------------------------------------------
 // HTML
 
-gulp.task('indexDeployment', function() {
+gulp.task('copyHTML', function() {
 
   gulp.src(['./app/index.html'])
-    .pipe(gulp.dest('./deploy/'))
+    .pipe(gulp.dest('./deploy/'));
 
 });
 
 // --------------------------------------------------
-// TESTS
+// Tests
 
 var karmaConfigReader = {
   set: function(value) {
     karmaCommonConf = value;
     karmaCommonConf.logLevel = 'INFO';
   }
-}
+};
 
 var karmaConfig = require('./karma.conf.js');
 karmaConfig(karmaConfigReader);
 
 gulp.task('test', function (done) {
+
   karma.start(_.assign({}, karmaCommonConf, {singleRun: true}),
     function(output){
       if(output) {
@@ -177,33 +170,34 @@ gulp.task('test', function (done) {
       }
       done();
     });
+
 });
 
 // --------------------------------------------------
-// DEFAULT
+// Meta tasks
 
-gulp.task('develop', ['less', 'images', 'jsLibraries', 'jsApp', 'indexDeployment'/*, 'test'*/]);
+gulp.task('develop', ['compileLess', 'copyImages', 'compileJSLibraries', 'compileJSApp', 'copyHTML'/*, 'test'*/]);
 
 gulp.task('deploy', ['develop']);
 
 gulp.task('default', ['develop'], function(){
 
   gulp.watch('app/less/**/*.*', function() {
-    gulp.run('less');
+    gulp.run('compileLess');
   });
 
   gulp.watch('app/images/**/*.*', function() {
-    gulp.run('images');
+    gulp.run('copyImages');
   });
 
   gulp.watch(['app/index.html', 'app/src/**/*.*', 'test/**/*.*'], function() {
     // gulp.run('test');
-    gulp.run('jsApp');
-    gulp.run('indexDeployment');
+    gulp.run('compileJSApp');
+    gulp.run('copyHTML');
   });
 
 });
 
 gulp.task('serve', [], function(){
-  require('./server/server.js')
+  require('./server/server.js');
 });
