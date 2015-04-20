@@ -17,15 +17,15 @@ requirejs.config({
     'angularAnimate': '../bower_components/angular-animate/angular-animate',
     'tweenmax': '../bower_components/greensock/src/uncompressed/TweenMax',
     'jquery': '../bower_components/jquery/jquery',
-    'underscore': '../bower_components/underscore/underscore'
+    'lodash': '../bower_components/lodash/lodash'
   },
 
   shim: {
     'angularMocks': {
         exports: 'angularMocks',
-        deps: ['angular']            
+        deps: ['angular']
     },
-    
+
     'angular': {
       exports: 'angular',
       deps: ['jquery']
@@ -48,7 +48,7 @@ requirejs.config({
     'jquery': {
       exports: '$'
     },
-    'underscore': {
+    'lodash': {
       exports: '_'
     }
   },

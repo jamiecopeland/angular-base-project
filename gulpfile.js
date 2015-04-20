@@ -69,7 +69,7 @@ var libraryFiles = [
   './app/bower_components/angular-sanitize/angular-sanitize.js',
   './app/bower_components/angular-animate/angular-animate.js',
   './app/bower_components/jquery/dist/jquery.js',
-  './app/bower_components/underscore/underscore.js'
+  './app/bower_components/lodash/lodash.js'
 ];
 
 var onESLintError = function (err) {
