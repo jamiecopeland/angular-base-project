@@ -40,7 +40,7 @@ gulp.task('compileLess', function () {
       errorHandler: onLessError
     }))
     .pipe(less({
-        compress: false
+        compress: true
     }))
     .pipe(autoprefixer({
       browsers: ['> 1%'],
