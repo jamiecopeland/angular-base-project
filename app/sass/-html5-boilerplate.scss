@@ -1,4 +1,4 @@
-@import "_normalize.less";
+@import "-normalize.scss";
 /*! HTML5 Boilerplate v4.3.0 | MIT License | http://h5bp.com/ */
 
 /*
@@ -98,8 +98,8 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
-@import "mixins.less";
-@import "main.less";
+@import "mixins.scss";
+@import "main.scss";
 
 
 

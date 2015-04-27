@@ -1,5 +1,6 @@
 var gulp = require('gulp');
-var less = require('gulp-less');
+var sass = require('gulp-sass');
+var minifyCSS = require('gulp-minify-css');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var rjs = require('gulp-requirejs');
@@ -21,31 +22,34 @@ var runSequence = require('run-sequence');
 var eslint = require('gulp-eslint');
 
 // --------------------------------------------------
-// LESS
+// Sass
 
-var onLessError = function (err) {
-  var fileName = _.last(err.message.split('.less')[0].split('/'));
-  var lineNumber = err.message.split('line no.')[1].replace(' ', '');
+var onSassError = function (err) {
+  var fileName = _.last(err.file.split('/'));
+  var message = fileName + ' - line: ' + err.line + '\n' + err.message.split('in file /')[0];
 
   notifier.notify({
-    title: 'Less Error',
-    message: fileName + '.less - line: ' + lineNumber + '\n' + err.message.split('in file /')[0]
+    title: 'Sass Error',
+    message: message
   });
+
+  console.log('\nSass error:');
+  console.log(' ', err);
+  console.log('\n');
 };
 
-gulp.task('compileLess', function () {
-
-  gulp.src('app/less/_html5-boilerplate.less')
-    .pipe(plumber({
-      errorHandler: onLessError
-    }))
-    .pipe(less({
-        compress: true
+gulp.task('compileSass', function () {
+  console.log('compileSass');
+  gulp.src('app/sass/-html5-boilerplate.scss')
+    .pipe(sass({
+      errLogToConsole: false,
+      onError: onSassError
     }))
     .pipe(autoprefixer({
       browsers: ['> 1%'],
       cascade: false
     }))
+    .pipe(minifyCSS())
     .pipe(rename('main.css'))
     .pipe(gulp.dest('deploy/css'));
 
@@ -181,14 +185,14 @@ gulp.task('test', function (done) {
 // --------------------------------------------------
 // Meta tasks
 
-gulp.task('develop', ['compileLess', 'copyImages', 'compileJSLibraries', 'compileJSApp', 'copyHTML'/*, 'test'*/]);
+gulp.task('develop', ['compileSass', 'copyImages', 'compileJSLibraries', 'compileJSApp', 'copyHTML'/*, 'test'*/]);
 
 gulp.task('deploy', ['develop']);
 
 gulp.task('default', ['develop'], function(){
 
-  gulp.watch('app/less/**/*.*', function() {
-    gulp.run('compileLess');
+  gulp.watch('app/sass/**/*.*', function() {
+    gulp.run('compileSass');
   });
 
   gulp.watch('app/images/**/*.*', function() {
