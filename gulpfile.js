@@ -15,6 +15,7 @@ var ngAnnotate = require('gulp-ng-annotate');
 var uglify = require('gulp-uglify');
 var htmlreplace = require('gulp-html-replace');
 var templateCache = require('gulp-angular-templatecache');
+var autoprefixer = require('gulp-autoprefixer');
 var del = require('del');
 var runSequence = require('run-sequence');
 var eslint = require('gulp-eslint');
@@ -39,7 +40,11 @@ gulp.task('compileLess', function () {
       errorHandler: onLessError
     }))
     .pipe(less({
-        compress: true
+        compress: false
+    }))
+    .pipe(autoprefixer({
+      browsers: ['> 1%'],
+      cascade: false
     }))
     .pipe(rename('main.css'))
     .pipe(gulp.dest('deploy/css'));
